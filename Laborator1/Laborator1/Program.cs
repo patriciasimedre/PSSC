@@ -5,7 +5,7 @@ Cart cart = Cart.Empty();
 
 while (true)
 {
-    Console.WriteLine("\n=== MENIU ===");
+    Console.WriteLine("\n2=== MENIU ===");
     Console.WriteLine("1) Reseteaza / Creeaza cos gol");
     Console.WriteLine("2) Adauga produs");
     Console.WriteLine("3) Elimina produs");
