@@ -1,0 +1,15 @@
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/bin/Debug/net9.0/Laborator1
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/bin/Debug/net9.0/Laborator1.deps.json
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/bin/Debug/net9.0/Laborator1.runtimeconfig.json
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/bin/Debug/net9.0/Laborator1.dll
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/bin/Debug/net9.0/Laborator1.pdb
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.GeneratedMSBuildEditorConfig.editorconfig
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.AssemblyInfoInputs.cache
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.AssemblyInfo.cs
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.csproj.CoreCompileInputs.cache
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.sourcelink.json
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.dll
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/refint/Laborator1.dll
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.pdb
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/Laborator1.genruntimeconfig.cache
+/Users/patrysimedre/Library/CloudStorage/OneDrive-UniversitateaPolitehnicaTimisoara/AN4/PSSC/Laborator1/Laborator1/obj/Debug/net9.0/ref/Laborator1.dll
