@@ -19,15 +19,28 @@ namespace Laborator4_AI
             Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
             Console.WriteLine();
 
-            var dbPath = Path.Combine(Path.GetTempPath(), "exam_scheduling_demo.db");
-            if (File.Exists(dbPath)) File.Delete(dbPath);
+            // MySQL connection string
+            var connectionString = "Server=127.0.0.1;Database=student_management;User=root;Port=3306;";
             
-            var db = new SchedulingDbContext(dbPath);
-            db.EnsureSeeded();
-
-            Console.WriteLine($"📂 Database: {dbPath}");
-            Console.WriteLine($"🏫 Available rooms: {db.Rooms.Count()}");
-            Console.WriteLine();
+            var db = new SchedulingDbContext(connectionString);
+            
+            try
+            {
+                db.EnsureSeeded();
+                Console.WriteLine($"🐬 Database: MySQL - student_management");
+                Console.WriteLine($"🏫 Available rooms: {db.Rooms.Count()}");
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Database connection failed: {ex.Message}");
+                Console.WriteLine("💡 Make sure MySQL is running and the database 'student_management' exists.");
+                Console.WriteLine("   You can create it with: CREATE DATABASE student_management;");
+                Console.WriteLine();
+                Console.WriteLine("Apasă orice tastă pentru a ieși...");
+                Console.ReadKey();
+                return;
+            }
 
             var coursesCatalog = new Dictionary<string, DateTime>
             {
@@ -50,6 +63,9 @@ namespace Laborator4_AI
 
             PrintSection("WORKFLOW 4: CONTESTAȚII");
             RunContestationWorkflow(db);
+
+            PrintSection("WORKFLOW 5: GESTIONARE STUDENȚI ȘI NOTE");
+            RunStudentGradeWorkflow(db);
 
             Console.WriteLine();
             Console.WriteLine("✅ DEMONSTRAȚIE COMPLETĂ!");
@@ -237,6 +253,50 @@ namespace Laborator4_AI
             else if (evt is ContestationFailedEvent failure)
             {
                 Console.WriteLine($"   ❌ {failure.StudentRegistrationNumber}: {string.Join("; ", failure.Reasons)}");
+            }
+        }
+
+        static void RunStudentGradeWorkflow(SchedulingDbContext db)
+        {
+            Console.WriteLine("\n🟢 Test 1: Afișare studenți existenți");
+            var students = StudentGradeRepository.GetAllStudents(db);
+            foreach (var student in students)
+            {
+                var avgGrade = StudentGradeRepository.GetAverageGrade(db, student.StudentId);
+                Console.WriteLine($"   📚 Student: {student.Name} ({student.RegistrationNumber}) - Media: {avgGrade:F2}");
+                
+                foreach (var grade in student.Grades)
+                {
+                    Console.WriteLine($"      📝 Examen: {grade.Exam?.ToString("F2") ?? "N/A"}, " +
+                                    $"Activitate: {grade.Activity?.ToString("F2") ?? "N/A"}, " +
+                                    $"Finală: {grade.Final?.ToString("F2") ?? "N/A"}");
+                }
+            }
+
+            Console.WriteLine("\n🟢 Test 2: Adăugare student nou");
+            var success = StudentGradeRepository.AddStudent(db, "LM12350", "Popa Alexandru");
+            if (success)
+            {
+                Console.WriteLine("   ✅ Student nou adăugat cu succes!");
+                
+                var newStudent = StudentGradeRepository.GetStudentByRegistrationNumber(db, "LM12350");
+                if (newStudent != null)
+                {
+                    var gradeSuccess = StudentGradeRepository.AddGrade(db, newStudent.StudentId, 9.25m, 8.75m, 9.00m);
+                    if (gradeSuccess)
+                    {
+                        Console.WriteLine("   ✅ Note adăugate cu succes!");
+                    }
+                }
+            }
+
+            Console.WriteLine("\n🟢 Test 3: Căutare student specific");
+            var specificStudent = StudentGradeRepository.GetStudentByRegistrationNumber(db, "LM12345");
+            if (specificStudent != null)
+            {
+                Console.WriteLine($"   🔍 Găsit: {specificStudent.Name} ({specificStudent.RegistrationNumber})");
+                var grades = StudentGradeRepository.GetGradesByStudent(db, specificStudent.StudentId);
+                Console.WriteLine($"   📊 Numărul de note: {grades.Count()}");
             }
         }
     }

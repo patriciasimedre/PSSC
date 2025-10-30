@@ -6,6 +6,7 @@ namespace Laborator4_AI.Infrastructure
     using Microsoft.EntityFrameworkCore;
     using Laborator4_AI.Domain.Models.ValueObjects;
     using Laborator4_AI.Domain.Models.Entities;
+    using Laborator4_AI.Domain.Models;
 
     /// <summary>
     /// Entity Framework DbContext for exam scheduling system
@@ -18,17 +19,21 @@ namespace Laborator4_AI.Infrastructure
         public DbSet<StudentRegistrationEntity> StudentRegistrations { get; set; } = null!;
         public DbSet<ExamGradeEntity> ExamGrades { get; set; } = null!;
         public DbSet<ContestationEntity> Contestations { get; set; } = null!;
+        
+        // New entities from the SQL schema
+        public DbSet<Student> Students { get; set; } = null!;
+        public DbSet<StudentGradeEntity> Grades { get; set; } = null!;
 
-        private readonly string _dbPath;
+        private readonly string _connectionString;
 
-        public SchedulingDbContext(string dbPath)
+        public SchedulingDbContext(string connectionString)
         {
-            _dbPath = dbPath;
+            _connectionString = connectionString;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite($"Data Source={_dbPath}");
+            optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,10 +55,28 @@ namespace Laborator4_AI.Infrastructure
                 .IsUnique();
 
             modelBuilder.Entity<ContestationEntity>().HasKey(c => c.Id);
+
+            // Configuration for new Student and Grade entities
+            modelBuilder.Entity<Student>()
+                .HasKey(s => s.StudentId);
+            
+            modelBuilder.Entity<Student>()
+                .HasIndex(s => s.RegistrationNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<StudentGradeEntity>()
+                .HasKey(g => g.GradeId);
+
+            modelBuilder.Entity<StudentGradeEntity>()
+                .HasOne(g => g.Student)
+                .WithMany(s => s.Grades)
+                .HasForeignKey(g => g.StudentId)
+                .HasConstraintName("FK_Grades_Student");
         }
 
         public void EnsureSeeded()
         {
+            // Create database and tables if they don't exist
             Database.EnsureCreated();
             
             if (!Rooms.Any())
@@ -68,6 +91,38 @@ namespace Laborator4_AI.Infrastructure
                     new RoomEntity { Number = "C401", Capacity = 50 },
                 });
                 SaveChanges();
+            }
+
+            // Seed Students
+            if (!Students.Any())
+            {
+                Students.AddRange(new[]
+                {
+                    new Student { RegistrationNumber = "LM12345", Name = "Popescu Ion" },
+                    new Student { RegistrationNumber = "LM12346", Name = "Ionescu Maria" },
+                    new Student { RegistrationNumber = "LM12347", Name = "Dumitrescu Ana" },
+                    new Student { RegistrationNumber = "LM12348", Name = "Gheorghiu Mihai" },
+                    new Student { RegistrationNumber = "LM12349", Name = "Vasilescu Elena" },
+                });
+                SaveChanges();
+            }
+
+            // Seed Grades
+            if (!Grades.Any())
+            {
+                var students = Students.ToList();
+                if (students.Any())
+                {
+                    Grades.AddRange(new[]
+                    {
+                        new StudentGradeEntity { StudentId = students[0].StudentId, Exam = 8.50m, Activity = 9.00m, Final = 8.75m },
+                        new StudentGradeEntity { StudentId = students[1].StudentId, Exam = 7.25m, Activity = 8.50m, Final = 7.88m },
+                        new StudentGradeEntity { StudentId = students[2].StudentId, Exam = 6.00m, Activity = 7.00m, Final = 6.50m },
+                        new StudentGradeEntity { StudentId = students[3].StudentId, Exam = 9.00m, Activity = 8.75m, Final = 8.88m },
+                        new StudentGradeEntity { StudentId = students[4].StudentId, Exam = 5.50m, Activity = 6.25m, Final = 5.88m },
+                    });
+                    SaveChanges();
+                }
             }
         }
     }
@@ -355,6 +410,97 @@ namespace Laborator4_AI.Infrastructure
             {
                 return false;
             }
+        }
+    }
+
+    /// <summary>
+    /// Repository for Student and Grade operations
+    /// </summary>
+    public static class StudentGradeRepository
+    {
+        public static IEnumerable<Student> GetAllStudents(SchedulingDbContext db)
+        {
+            return db.Students.Include(s => s.Grades).ToList();
+        }
+
+        public static Student? GetStudentByRegistrationNumber(SchedulingDbContext db, string registrationNumber)
+        {
+            return db.Students
+                .Include(s => s.Grades)
+                .FirstOrDefault(s => s.RegistrationNumber == registrationNumber);
+        }
+
+        public static bool AddStudent(SchedulingDbContext db, string registrationNumber, string name)
+        {
+            try
+            {
+                var student = new Student
+                {
+                    RegistrationNumber = registrationNumber,
+                    Name = name
+                };
+
+                db.Students.Add(student);
+                db.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool AddGrade(SchedulingDbContext db, int studentId, decimal? exam = null, decimal? activity = null, decimal? final = null)
+        {
+            try
+            {
+                var grade = new StudentGradeEntity
+                {
+                    StudentId = studentId,
+                    Exam = exam,
+                    Activity = activity,
+                    Final = final
+                };
+
+                db.Grades.Add(grade);
+                db.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool UpdateGrade(SchedulingDbContext db, int gradeId, decimal? exam = null, decimal? activity = null, decimal? final = null)
+        {
+            try
+            {
+                var grade = db.Grades.Find(gradeId);
+                if (grade == null) return false;
+
+                if (exam.HasValue) grade.Exam = exam;
+                if (activity.HasValue) grade.Activity = activity;
+                if (final.HasValue) grade.Final = final;
+
+                db.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static IEnumerable<StudentGradeEntity> GetGradesByStudent(SchedulingDbContext db, int studentId)
+        {
+            return db.Grades.Where(g => g.StudentId == studentId).ToList();
+        }
+
+        public static decimal GetAverageGrade(SchedulingDbContext db, int studentId)
+        {
+            var grades = db.Grades.Where(g => g.StudentId == studentId && g.Final.HasValue).ToList();
+            return grades.Any() ? grades.Average(g => g.Final!.Value) : 0;
         }
     }
 }
